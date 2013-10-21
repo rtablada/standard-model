@@ -1,4 +1,4 @@
-<?php namespace Rtablada\StandardModel;
+<?php namespace Rtablada;
 
 use Closure;
 use DateTime;
@@ -7,9 +7,17 @@ use Carbon\Carbon;
 use Illuminate\Support\Contracts\JsonableInterface;
 use Illuminate\Support\Contracts\ArrayableInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\MassAssignmentException;
 
 abstract class StandardModel implements ArrayAccess, ArrayableInterface, JsonableInterface
 {
+
+	/**
+	 * The model's attributes.
+	 *
+	 * @var array
+	 */
+	protected $attributes = array();
 
 	/**
 	 * The model attribute's original state.
@@ -103,8 +111,6 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 			static::boot();
 		}
 
-		$this->syncOriginal();
-
 		$this->fill($attributes);
 	}
 
@@ -194,13 +200,7 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 
 	public function createCollectionFromItems($items = array())
 	{
-		$models = array();
-
-		foreach ($items as $item) {
-			$model = $this->newInstance($item);
-
-			$models[] = $model;
-		}
+		$models = $this->getArrayOfInstances($items);
 
 		return $this->newCollection($models);
 	}
@@ -214,6 +214,26 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 	public function newCollection(array $models = array())
 	{
 		return new Collection($models);
+	}
+
+	protected function getArrayOfInstances($items = array())
+	{
+		$models = array();
+
+		foreach ($items as $item) {
+			$model = $this->newInstance($item);
+
+			$models[] = $model;
+		}
+
+		return $models;
+	}
+
+	public function makePaginator($items = array(), $total, $perPage)
+	{
+		$models = $this->getArrayOfInstances($items);
+
+		return Paginator::make($models, $total, $perPage);
 	}
 
 	/**
@@ -451,6 +471,22 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 	}
 
 	/**
+	 * Get an attribute array of all arrayable values.
+	 *
+	 * @param  array  $values
+	 * @return array
+	 */
+	protected function getArrayableItems(array $values)
+	{
+		if (count($this->visible) > 0)
+		{
+			return array_intersect_key($values, array_flip($this->visible));
+		}
+
+		return array_diff_key($values, array_flip($this->hidden));
+	}
+
+	/**
 	 * Get an attribute from the model.
 	 *
 	 * @param  string  $key
@@ -586,9 +622,7 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 	 */
 	public function getDates()
 	{
-		$defaults = array(static::CREATED_AT, static::UPDATED_AT, static::DELETED_AT);
-
-		return array_merge($this->dates, $defaults);
+		return $this->dates;
 	}
 
 	/**
@@ -786,7 +820,7 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 	 */
 	public function __isset($key)
 	{
-		return ((isset($this->attributes[$key]) or
+		return (isset($this->attributes[$key]) or
 			    ($this->hasGetMutator($key) and ! is_null($this->getAttributeValue($key))));
 	}
 
