@@ -20,6 +20,14 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 	protected $attributes = array();
 
 	/**
+	 * Dictionary used to translate item keys to something
+	 * more usable.
+	 *
+	 * @var array
+	 */
+	protected $dictionary = null;
+
+	/**
 	 * The model attribute's original state.
 	 *
 	 * @var array
@@ -147,6 +155,15 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 	 */
 	public function fill(array $attributes)
 	{
+		if ($this->dictionary) {
+			$oldAttributes = $attributes;
+			$attributes = array();
+
+			foreach ($this->dictionary as $term => $key) {
+				$attributes[$key] = $oldAttributes[$term];
+			}
+		}
+
 		foreach ($this->fillableFromArray($attributes) as $key => $value)
 		{
 			// The developers may choose to place some attributes in the "fillable"
