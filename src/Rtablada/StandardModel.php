@@ -233,7 +233,7 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 	{
 		$models = $this->getArrayOfInstances($items);
 
-		return Paginator::make($models, $total, $perPage);
+		return \Paginator::make($models, $total, $perPage);
 	}
 
 	/**
