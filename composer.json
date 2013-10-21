@@ -1,0 +1,21 @@
+{
+    "name": "rtablada/standard-model",
+    "description": "A slick little way to work with data in an \"Eloquent\" fashion",
+    "authors": [
+        {
+            "name": "Ryan Tablada",
+            "email": "ryan.tablada@gmail.com"
+        }
+    ],
+	"keywords": ["model", "laravel"],
+	"require": {
+		"laravel/framework": "4.0.*"
+	},
+	"autoload": {
+		"psr-0": {
+			"Rtablada": "src/"
+		}
+	},
+	"minimum-stability": "dev",
+    "license": "MIT"
+}
