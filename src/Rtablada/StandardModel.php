@@ -162,6 +162,8 @@ abstract class StandardModel implements ArrayAccess, ArrayableInterface, Jsonabl
 			foreach ($this->dictionary as $term => $key) {
 				if (isset($oldAttributes[$term])) {
 					$attributes[$key] = $oldAttributes[$term];
+				} elseif (isset($oldAttributes[$key])) {
+					$attributes[$key] = $oldAttributes[$key];
 				}
 			}
 		}
