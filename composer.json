@@ -9,7 +9,8 @@
     ],
 	"keywords": ["model", "laravel"],
 	"require": {
-		"illuminate/support": "~4"
+		"illuminate/support": "~4",
+		"nesbot/Carbon": "*"
 	},
 	"autoload": {
 		"psr-0": {
